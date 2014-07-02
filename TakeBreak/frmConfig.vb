@@ -79,9 +79,16 @@ Public Class frmConfig
         'Label1.Text = CInt((Environment.TickCount - lastInputInf.dwTime) / 1000).ToString
         If CInt((Environment.TickCount - lastInputInf.dwTime) / 1000) > idleResetTime Then 'check if the user is idle.
             activityStart = NowNearestSecond() 'Reset the activity timer.
-            Status = DeskStatus.Idle
+
+            If Status <> DeskStatus.Idle Then
+                Status = DeskStatus.Idle
+                Debug.Print("Entered idle")
+                MakeIcon()
+            End If
         ElseIf Not (CInt((Environment.TickCount - lastInputInf.dwTime) / 1000) > idleResetTime) And Status = DeskStatus.Idle Then
             Status = DeskStatus.Sitting
+            MakeIcon()
+            Debug.Print("Left idle")
         End If
 
         activeTime = NowNearestSecond().Subtract(activityStart)
@@ -89,7 +96,7 @@ Public Class frmConfig
         lblIdleTime.Text = New TimeSpan(0, 0, CInt((Environment.TickCount - lastInputInf.dwTime) / 1000)).ToString
 
         'Redo the icon once a minute.
-        If activeTime.Seconds < 2 Then MakeIcon()
+        If activeTime.Seconds < 2 And Not Status = DeskStatus.Idle Then MakeIcon()
 
         'Check if it's break time.
         Select Case Status
@@ -139,6 +146,7 @@ Public Class frmConfig
 
 
         If e.Button = Windows.Forms.MouseButtons.Left Then
+            Tray.BalloonTipTitle = DeskStr(currentStatus)
             Tray.ShowBalloonTip(3000)
         End If
 
@@ -194,6 +202,9 @@ Public Class frmConfig
             Case DeskStatus.Break, DeskStatus.Standing
                 output = (breakLimit.Subtract(activeTime).Minutes + 1).ToString()
                 percent = (activeTime.Ticks / breakLimit.Ticks) * 360
+            Case DeskStatus.Idle
+                output = "Zz"
+                percent = 0
             Case Else
                 output = (timeLimit.Subtract(activeTime).Minutes + 1).ToString()
                 percent = (activeTime.Ticks / timeLimit.Ticks) * 360
@@ -222,11 +233,12 @@ Public Class frmConfig
         Dim newIcon As Icon = System.Drawing.Icon.FromHandle(HIcon)
 
         ' Set the Icon attribute to the new icon. 
-        Tray.Icon = newIcon
+        Tray.Icon = newIcon.Clone()
 
         ' You can now destroy the icon, since the form creates its  
         ' own copy of the icon accessible through the Form.Icon property.
-        'DestroyIcon(newIcon.Handle)
+        DestroyIcon(newIcon.Handle)
+
     End Sub
 
     Private Sub ExitToolStripMenuItem_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles ExitToolStripMenuItem.Click
@@ -287,9 +299,9 @@ Public Class frmConfig
             Return currentStatus
         End Get
         Set(ByVal value As DeskStatus)
+            'If value = currentStatus Then Exit Property
             currentStatus = value
 
-            Tray.BalloonTipTitle = DeskStr(currentStatus)
             Tray.Text = "Status: " & DeskStr(currentStatus)
             mnuStatus2.Text = DeskStr(currentStatus)
 
