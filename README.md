@@ -1,4 +1,4 @@
-![](https://raw.githubusercontent.com/nobuyukinyuu/TakeBreak/master/tb128.png) TakeBreak
+![](tbIcon.png) 
 =========
 
 A timer which monitors your PC activity and reminds you to take a break when you've been sitting down too long.
@@ -12,7 +12,7 @@ TakeBreak lets you set a reminder for yourself to take a break when you've been 
 Originally, TakeBreak was meant to be designed as a "Reverse Screensaver" application.  I hope to add this functionality eventually, to add an extra level of break taking for those of us who would ignore the gentle reminder.  Please enjoy the application.
 
 ##Screenshot
-
+![](https://raw.githubusercontent.com/nobuyukinyuu/TakeBreak/master/screenshot.png)
 
 ##Donate
 If you like this project, please consider giving a small donation to support further development.
